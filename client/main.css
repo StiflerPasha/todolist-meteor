@@ -1,0 +1,18 @@
+.component {
+    margin: 20px;
+    padding: 10px;
+    border: 2px solid red;
+    border-radius: 15px;
+    background-color: #FFF4E0;
+}
+
+td {
+    font-weight: bolder;
+    background-color: #F1FFF9;
+}
+
+tr.checked td {
+    background-color: lightgray;
+    text-decoration: line-through;
+    font-weight: normal;
+}
