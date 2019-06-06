@@ -16,3 +16,20 @@ tr.checked td {
     text-decoration: line-through;
     font-weight: normal;
 }
+
+.counts {
+    display: flex;
+    justify-content: space-around;
+}
+
+.counts pre:nth-child(1) {
+    color: cornflowerblue;
+}
+
+.counts pre:nth-child(2) {
+    color: forestgreen;
+}
+
+.counts pre:nth-child(3) {
+    color: indianred;
+}

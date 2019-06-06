@@ -1,85 +1,91 @@
-import React, {Component} from 'react';
-import {Task} from './Task';
+import React, {useState} from 'react';
+import AddTaskForm from "./AddTaskForm";
+import Task from './Task';
+import Counts from "./Counts";
 import {withTracker} from 'meteor/react-meteor-data';
 import {Tasks} from "../api/tasks";
-import ReactDOM from 'react-dom'
-
-/*
-const today = new Date();
-const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-*/
+import AccountsUIWrapper from "./AccountsUIWrapper";
 
 
-class App extends Component {
-	 handleSubmit(event) {
-			event.preventDefault();
-			const text = ReactDOM.findDOMNode(this.refs.textInput).value.trim();
+const App = ({tasks, incompleteCount, loading}) => {
 
-			if(text === "") return false;
+	 const [hideCompleted, setHideCompleted] = useState(false);
 
+	 const addTask = (text) => {
+			if (!text) return false;
 			Tasks.insert({
 				 text,
 				 createdAt: new Date().toLocaleString()
 			});
+	 };
 
-			ReactDOM.findDOMNode(this.refs.textInput).value = "";
-	 }
+	 const updateTask = (task) => {
+			Tasks.update(task._id, {
+				 $set: {isDone: !task.isDone}
+			})
+	 };
 
-	 renderTasks() {
-			return this.props.tasks.map(task => (
-				<Task key={task._id} task={task}/>
+	 const deleteTask = (task) => {
+			Tasks.remove(task._id);
+	 };
+
+	 const toggleHideCompleted = () => {
+			setHideCompleted(!hideCompleted)
+	 };
+
+	 const renderTasks = () => {
+			let filteredTasks = tasks;
+			if (hideCompleted) {
+				 filteredTasks = filteredTasks.filter(task => !task.isDone)
+			}
+			return filteredTasks.map(task => (
+				<Task key={task._id}
+							task={task}
+							updateTask={updateTask}
+							deleteTask={deleteTask}/>
 			))
-	 }
+	 };
 
-	 render() {
-			return (
-				<div className='container'>
-					 <div className='row'>
-							<div className="col-md-6 mx-auto component">
-								 <header>
-										<h1 className="text-center">Todo List</h1>
-										<form onSubmit={this.handleSubmit.bind(this)}>
-											 <div className="input-group mb-5 d-flex justify-content-center">
-													<div className="input-group-prepend">
-														 <input
-															 type="text"
-															 ref="textInput"
-															 className="form-control is-valid"
-															 placeholder="Enter the task..."
-															 aria-label="ToDo task"
-															 aria-describedby="button-addon2"
-															 autoComplete='off'
-														 />
-														 <div className="input-group-append">
-																<button
-																	className="btn btn-outline-info ml-3"
-																	type="submit"
-																	id="button-addon2"
-																	onClick={this.handleSubmit.bind(this)}
-																>Add_Task
-																</button>
-														 </div>
-													</div>
-											 </div>
-										</form>
-								 </header>
 
-								 <table className="table">
-										<tbody>
-										{this.renderTasks()}
-										</tbody>
-								 </table>
-							</div>
+	 return loading ? (<div>Loading</div>) : (
+		 <div className='container'>
+				<div className='row'>
+					 <div className="col-md-6 mx-auto component">
+							<header>
+								 <Counts tasks={tasks} incompleteCount={incompleteCount}/>
+
+								 <AccountsUIWrapper/>
+
+								 <h1 className="text-center">Todo List</h1>
+
+								 <AddTaskForm addTask={addTask}/>
+
+								 <label className='mb-4'>
+										<input type="checkbox"
+													 readOnly
+													 checked={hideCompleted}
+													 onClick={() => toggleHideCompleted()}/>
+										Hide Completed Tasks
+								 </label>
+							</header>
+
+							<table className="table">
+								 <tbody>
+								 {renderTasks()}
+								 </tbody>
+							</table>
 					 </div>
 				</div>
-			);
-	 }
-}
+		 </div>
+	 );
+};
 
 export default withTracker(() => {
+	 const loading = !Meteor.subscribe('tasks').ready();
 	 return {
+			loading,
 			tasks: Tasks.find({}, {sort: {createdAt: -1}}).fetch(),
+			incompleteCount: Tasks.find({isDone: {$ne: true}}).count()
 	 };
 })(App)
 
