@@ -12,7 +12,8 @@
     "meteor-node-stubs": "^0.4.1",
     "mongodb": "^3.2.4",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "prop-types": "latest"
   },
   "meteor": {
     "mainModule": {
